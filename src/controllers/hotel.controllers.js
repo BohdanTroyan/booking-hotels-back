@@ -1,5 +1,5 @@
-const Hotel = require("../models/hotel.model.js");
-const User = require("../models/user.model.js");
+const Hotel = require('../models/hotel.model.js');
+const User = require('../models/user.model.js');
 exports.findAll = (req, res) => {
   Hotel.find()
     .then((hotels) => {
@@ -8,7 +8,7 @@ exports.findAll = (req, res) => {
     .catch((err) => {
       res.status(500).send({
         message:
-          err.message || "Something went wrong while getting list of hotels.",
+          err.message || 'Something went wrong while getting list of hotels.',
       });
     });
 };
@@ -17,7 +17,7 @@ exports.create = (req, res) => {
   // Validate request
   if (!req.body) {
     return res.status(400).send({
-      message: "Please fill all required field",
+      message: 'Please fill all required field',
     });
   }
   // Create a new Hotel
@@ -36,7 +36,7 @@ exports.create = (req, res) => {
     })
     .catch((err) => {
       res.status(500).send({
-        message: err.message || "Something went wrong while creating new user.",
+        message: err.message || 'Something went wrong while creating new user.',
       });
     });
 };
@@ -46,10 +46,10 @@ exports.booked = async (req, res) => {
   await Hotel.findOneAndUpdate(
     {
       id: req.body.id_Hotel,
-      "Rooms.id": req.body.id_Room,
+      'Rooms.id': req.body.id_Room,
     },
     {
-      $set: { "Rooms.$.booked": "true" },
+      $set: { 'Rooms.$.booked': 'true' },
     }
   );
   const user = await User.findOne({ login: req.body.login });

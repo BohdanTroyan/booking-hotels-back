@@ -1,6 +1,6 @@
-const User = require("../models/user.model.js");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const User = require('../models/user.model.js');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 // Retrieve and return all users from the database.
 exports.findAll = (req, res) => {
   User.find()
@@ -10,7 +10,7 @@ exports.findAll = (req, res) => {
     .catch((err) => {
       res.status(500).send({
         message:
-          err.message || "Something went wrong while getting list of users.",
+          err.message || 'Something went wrong while getting list of users.',
       });
     });
 };
@@ -19,15 +19,15 @@ exports.create = async (req, res) => {
   // Validate request
 
   let login =
-    (await User.findOne({ login: req.body.login })) == undefined ? "" : 1;
+    (await User.findOne({ login: req.body.login })) == undefined ? '' : 1;
 
-  if (req.body.login === "" || req.body.password === "") {
+  if (req.body.login === '' || req.body.password === '') {
     return res.status(400).send({
-      message: "Please fill all required field",
+      message: 'Please fill all required field',
     });
   } else if (login === 1) {
     return res.status(400).send({
-      message: "User already created!",
+      message: 'User already created!',
     });
   }
 
@@ -41,23 +41,28 @@ exports.create = async (req, res) => {
   });
   try {
     await user.save();
-    res.send({ message: "Registration succsess" });
+    res.send({ message: 'Registration succsess' });
   } catch (err) {
     res.status(400).send(err);
   }
 };
 // Find a single User with a id
 exports.login = async (req, res) => {
+  console.log('exports.login -> req.body.login', req.body.login);
+
   const user = await User.findOne({ login: req.body.login });
   console.log(req.body);
 
-  if (!user) return res.status(400).send("Login is not found");
+  if (!user) return res.status(401).send('Login is not found');
 
   const validPass = await bcrypt.compare(req.body.password, user.password);
-  if (!validPass) return res.status(400).send("Invalid password");
+  if (!validPass) return res.status(400).send('Invalid password');
+
+  const token = generateJwtToken(user.id);
+  console.log('exports.login -> token', token);
 
   res.send({
-    responseCode: 0,
+    token,
     login: req.body.login,
     balance: user.balance,
   });
@@ -68,19 +73,23 @@ exports.findOne = (req, res) => {
     .then((user) => {
       if (!user) {
         return res.status(404).send({
-          message: "User not found with id " + req.params.id,
+          message: 'User not found with id ' + req.params.id,
         });
       }
       res.send(user);
     })
     .catch((err) => {
-      if (err.kind === "ObjectId") {
+      if (err.kind === 'ObjectId') {
         return res.status(404).send({
-          message: "User not found with id " + req.params.id,
+          message: 'User not found with id ' + req.params.id,
         });
       }
       return res.status(500).send({
-        message: "Error getting user with id " + req.params.id,
+        message: 'Error getting user with id ' + req.params.id,
       });
     });
+};
+
+const generateJwtToken = (id) => {
+  return jwt.sign({ id }, 'secret');
 };
