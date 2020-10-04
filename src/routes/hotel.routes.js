@@ -1,11 +1,13 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const hotelController = require("../controllers/hotel.controllers");
+const hotelController = require('../controllers/hotel.controllers');
+const authMiddleware = require('../middlewares/auth.middleware');
+
 // Retrieve all hotels
-router.get("/", hotelController.findAll);
+router.get('/', authMiddleware.verifyToken, hotelController.findAll);
 
-router.post("/", hotelController.create);
+router.post('/', hotelController.create);
 
-router.put("/booked/", hotelController.booked);
+router.put('/booked/', hotelController.booked);
 
 module.exports = router;
